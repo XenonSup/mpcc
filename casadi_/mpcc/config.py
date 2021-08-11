@@ -5,7 +5,7 @@ ipopt_solver = 'mumps'
 solve_method = 'rk4'
 
 gen_compiled = False
-use_compiled = True
+use_compiled = False
 
 prefix = '_'.join(['mpcc', ipopt_solver, solve_method])
 if use_compiled: prefix += '_compiled'
@@ -21,7 +21,7 @@ os.makedirs(os.path.join(curr_path, 'out_mpcc', 'eval'), exist_ok=True)
 out_log_file = os.path.join(out_path, 'log', '_'.join([prefix, 'out.txt']))
 
 log_time = False
-log_simple_time = True
+log_simple_time = False
 time_csv = os.path.join(out_path, 'time', '_'.join([prefix, 'time.csv']))
 simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simple_time.csv']))
 

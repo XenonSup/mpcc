@@ -1,15 +1,15 @@
 import os
 import numpy as np
 
-T = 10. # Time horizon
-N = 40  # number of control intervals
+T = 1. # Time horizon
+N = 20  # number of control intervals
 D = 0.5 # inter-axle
 
 ts = 0.08
 e = 0.07
 
 init_ts = np.array([0, 0, np.pi/4, 0, 0])
-xf, yf = [2], [3]
+xf, yf = [4], [7]
 
 # init_ts = np.array([2, 1, np.pi/2, 0, 0])
 # xf, yf = [0, -3, -2, 1, 2], [3, 0, -3, -2, 1]
@@ -25,7 +25,7 @@ os.makedirs(out_path, exist_ok=True)
 os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
 
-log_simple_time = True
+log_simple_time = False
 simple_time_csv = os.path.join(out_path, 'time_simple', 'simple_time.csv')
 
 anim_save_file = os.path.join(out_path, 'acados_mpc.gif')

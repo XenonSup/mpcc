@@ -161,8 +161,12 @@ def build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly):
 
     # Create an NLP solver
     solver_opts = {}
-    solver_opts['ipopt.output_file'] = cfg.out_log_file
-    solver_opts['ipopt.print_level'] = 5
+    if cfg.log_time:
+        solver_opts['ipopt.output_file'] = cfg.out_log_file
+        solver_opts['ipopt.print_level'] = 5
+    else:
+        solver_opts['print_time'] = False
+        solver_opts['ipopt.print_level'] = 0
     solver_opts['ipopt.max_cpu_time'] = .5
     solver_opts['ipopt.linear_solver'] = cfg.ipopt_solver
 

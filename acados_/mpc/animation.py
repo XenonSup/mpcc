@@ -35,7 +35,7 @@ fig, (ax1, ax2) =  plt.subplots(1, 2, figsize=(10, 5))
 def solve_mpc():
 
     for i in range(N):
-        yref = np.array([xf, yf, 0, 0, 0, 0, 0])
+        yref = np.array([xf*i/N, yf*i/N, 0, 0, 0, 0, 0])
         ocp_solver.set(i, 'yref', yref)
     ocp_solver.set(N, 'yref', np.array([xf, yf, 0, 0, 0]))
     
@@ -142,8 +142,8 @@ ax1.legend([r'$x_f - x$',r'$y_f - y$', r'$a$', r'$\alpha$'])
 ax1.set_xlabel('Time horizon')
 ax1.grid(True)
 
-ax2.set_ylim([-5, 5])
-ax2.set_xlim([-5, 5])
+ax2.set_ylim([-10, 10])
+ax2.set_xlim([-10, 10])
 ax2.set_ylabel('y-axis')
 ax2.set_xlabel('x-axis')
 
