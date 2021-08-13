@@ -24,8 +24,13 @@ json_path = 'mpc_acados_ocp.json'
 os.makedirs(out_path, exist_ok=True)
 os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'accuracy'), exist_ok=True)
 
 log_simple_time = False
 simple_time_csv = os.path.join(out_path, 'time_simple', 'simple_time.csv')
+
+log_acc = False
+true_acc_csv = os.path.join(out_path, 'accuracy', 'true_acc.csv')
+est_acc_csv = os.path.join(out_path, 'accuracy', 'est_acc.csv')
 
 anim_save_file = os.path.join(out_path, 'acados_mpc.gif')

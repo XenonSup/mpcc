@@ -29,10 +29,13 @@ e = cfg.e
 
 keep_going = True
 num_targets = 0
+iteration = 0
 
 fig, (ax1, ax2) =  plt.subplots(1, 2, figsize=(10, 5))
 
 def solve_mpc():
+    global iteration
+    iteration += 1
 
     for i in range(N):
         yref = np.array([xf*i/N, yf*i/N, 0, 0, 0, 0, 0])
@@ -47,8 +50,7 @@ def solve_mpc():
         simple_time_writer.writerow([t1-t0])
     
     if status != 0:
-        ocp_solver.print_statistics()
-        raise Exception('acados acados_ocp_solver returned status {}. Exiting.'.format(status))
+        print("acados returned status {} in iteration {}.".format(status, iteration))
     
     for i in range(N):
         simX[i,:] = ocp_solver.get(i, 'x')
