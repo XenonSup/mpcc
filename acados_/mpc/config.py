@@ -24,7 +24,6 @@ json_path = 'mpc_acados_ocp.json'
 os.makedirs(out_path, exist_ok=True)
 os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
-os.makedirs(os.path.join(out_path, 'accuracy'), exist_ok=True)
 os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
 log_simple_time = False

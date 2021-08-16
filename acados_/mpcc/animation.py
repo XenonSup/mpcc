@@ -16,6 +16,11 @@ if cfg.log_simple_time:
     simple_time_csv = open(cfg.simple_time_csv, 'w')
     simple_time_writer = csv.writer(simple_time_csv)
 
+if cfg.log_path:
+    path_csv = open(cfg.path_csv, 'w')
+    path_writer = csv.writer(path_csv)
+    path_writer.writerow(['x', 'y', 'a', 'alpha'])
+
 T = cfg.T
 N = cfg.N
 D = cfg.D
@@ -88,6 +93,9 @@ def solve_mpc():
     ocp_solver.set(0, 'lbx', x0)
     ocp_solver.set(0, 'ubx', x0)
 
+    if cfg.log_path:
+        path_writer.writerow([simX[0][0], simX[0][1], simU[0][0], simU[0][1]])
+
     return simX, simU
 
 def gen():
@@ -104,6 +112,7 @@ def gen():
                 tplt = np.linspace(0, 1)
                 xplt = xpoly(tplt)
                 yplt = ypoly(tplt)
+            else: break
             print('number of targets reached:', num_targets)
             keep_going = True
         else: i += 1
@@ -203,3 +212,6 @@ plt.show()
 
 if cfg.log_simple_time:
     simple_time_csv.close()
+
+if cfg.log_path:
+    path_csv.close()

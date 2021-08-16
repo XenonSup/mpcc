@@ -13,11 +13,15 @@ json_path = 'mpcc_acados_ocp.json'
 os.makedirs(out_path, exist_ok=True)
 os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
 anim_save_file = os.path.join(out_path, '3_acados_mpcc.gif')
 
 log_simple_time = True
 simple_time_csv = os.path.join(out_path, 'time_simple', 'simple_time.csv')
+
+log_path = True
+path_csv = os.path.join(out_path, 'path', 'path.csv')
 
 ts = .08
 e = 0.1

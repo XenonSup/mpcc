@@ -8,8 +8,8 @@
 # from casadi_.mpcc import eval
 
 # from acados_.mpc import plot
-from acados_.mpc import animation
+# from acados_.mpc import animation
 # from acados_.mpc import eval
 
 # from acados_.mpcc import plot
-# from acados_.mpcc import animation
+from acados_.mpcc import animation

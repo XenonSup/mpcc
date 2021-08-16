@@ -18,7 +18,7 @@ if cfg.log_simple_time:
 if cfg.log_path:
     path_csv = open(cfg.path_csv, 'w')
     path_writer = csv.writer(path_csv)
-    path_writer.writerow(['x', 'y', 'alpha', 'a'])
+    path_writer.writerow(['x', 'y', 'a', 'alpha'])
 
 T = cfg.T
 N = cfg.N
