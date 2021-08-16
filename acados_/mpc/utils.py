@@ -10,3 +10,6 @@ def compute_step(init, ts, D): # init = [x, y, phi, delta, vx, aux, alphaux]
     v_ts = v + a*ts
 
     return np.array([x_ts, y_ts, phi_ts, delta_ts, v_ts])
+
+def get_mag(xc, yc, xf, yf):
+    return np.sqrt((xc - xf)**2 + (yc - yf)**2)

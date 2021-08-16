@@ -41,9 +41,8 @@ ACADOS_FLAGS = -fPIC -std=c99   #-fno-diagnostics-show-line-numbers -g
 # ACADOS_FLAGS += -g3
 
 MODEL_OBJ=
-MODEL_OBJ+= car_kinematic_model/car_kinematic_impl_dae_fun.o
-MODEL_OBJ+= car_kinematic_model/car_kinematic_impl_dae_fun_jac_x_xdot_z.o
-MODEL_OBJ+= car_kinematic_model/car_kinematic_impl_dae_jac_x_xdot_u_z.o
+MODEL_OBJ+= car_kinematic_model/car_kinematic_expl_ode_fun.o
+MODEL_OBJ+= car_kinematic_model/car_kinematic_expl_vde_forw.o
 
 
 OCP_OBJ=
@@ -73,9 +72,8 @@ all: clean casadi_fun example_sim example
 shared_lib: bundled_shared_lib ocp_shared_lib sim_shared_lib
 
 CASADI_MODEL_SOURCE=
-CASADI_MODEL_SOURCE+= car_kinematic_impl_dae_fun.c
-CASADI_MODEL_SOURCE+= car_kinematic_impl_dae_fun_jac_x_xdot_z.c
-CASADI_MODEL_SOURCE+= car_kinematic_impl_dae_jac_x_xdot_u_z.c
+CASADI_MODEL_SOURCE+= car_kinematic_expl_ode_fun.c
+CASADI_MODEL_SOURCE+= car_kinematic_expl_vde_forw.c
 
 casadi_fun:
 	( cd car_kinematic_model ; gcc $(ACADOS_FLAGS) -c $(CASADI_MODEL_SOURCE))

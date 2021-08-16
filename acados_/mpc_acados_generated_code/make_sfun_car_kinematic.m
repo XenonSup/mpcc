@@ -32,9 +32,8 @@
 %
 
 SOURCES = { ...
-            'car_kinematic_model/car_kinematic_impl_dae_fun.c', ...
-            'car_kinematic_model/car_kinematic_impl_dae_fun_jac_x_xdot_z.c', ...
-            'car_kinematic_model/car_kinematic_impl_dae_jac_x_xdot_u_z.c', ...
+            'car_kinematic_model/car_kinematic_expl_ode_fun.c', ...
+            'car_kinematic_model/car_kinematic_expl_vde_forw.c',...
             'acados_solver_sfunction_car_kinematic.c', ...
             'acados_solver_car_kinematic.c'
           };
@@ -83,17 +82,17 @@ i_in = i_in + 1;
 input_note = strcat(input_note, num2str(i_in), ') y_ref_0, size [7]\n ');
 i_in = i_in + 1;
 input_note = strcat(input_note, num2str(i_in), ') y_ref - concatenated for shooting nodes 1 to N-1,',...
-                    ' size [133]\n ');
+                    ' size [273]\n ');
 i_in = i_in + 1;
 input_note = strcat(input_note, num2str(i_in), ') y_ref_e, size [5]\n ');
 i_in = i_in + 1;
-input_note = strcat(input_note, num2str(i_in), ') lbx for shooting nodes 1 to N-1, size [38]\n ');
+input_note = strcat(input_note, num2str(i_in), ') lbx for shooting nodes 1 to N-1, size [78]\n ');
 i_in = i_in + 1;
-input_note = strcat(input_note, num2str(i_in), ') ubx for shooting nodes 1 to N-1, size [38]\n ');
+input_note = strcat(input_note, num2str(i_in), ') ubx for shooting nodes 1 to N-1, size [78]\n ');
 i_in = i_in + 1;
-input_note = strcat(input_note, num2str(i_in), ') lbu for shooting nodes 0 to N-1, size [40]\n ');
+input_note = strcat(input_note, num2str(i_in), ') lbu for shooting nodes 0 to N-1, size [80]\n ');
 i_in = i_in + 1;
-input_note = strcat(input_note, num2str(i_in), ') ubu for shooting nodes 0 to N-1, size [40]\n ');
+input_note = strcat(input_note, num2str(i_in), ') ubu for shooting nodes 0 to N-1, size [80]\n ');
 i_in = i_in + 1;
 
 fprintf(input_note)

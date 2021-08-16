@@ -15,6 +15,11 @@ if cfg.log_simple_time:
     simple_time_csv = open(cfg.simple_time_csv, 'w')
     simple_time_writer = csv.writer(simple_time_csv)
 
+if cfg.log_path:
+    path_csv = open(cfg.path_csv, 'w')
+    path_writer = csv.writer(path_csv)
+    path_writer.writerow(['x', 'y', 'alpha', 'a'])
+
 T = cfg.T
 N = cfg.N
 D = cfg.D
@@ -38,7 +43,8 @@ def solve_mpc():
     iteration += 1
 
     for i in range(N):
-        yref = np.array([xf*i/N, yf*i/N, 0, 0, 0, 0, 0])
+        # yref = np.array([xf*i/N, yf*i/N, 0, 0, 0, 0, 0])
+        yref = np.array([xf, yf, 0, 0, 0, 0, 0])
         ocp_solver.set(i, 'yref', yref)
     ocp_solver.set(N, 'yref', np.array([xf, yf, 0, 0, 0]))
     
@@ -62,6 +68,9 @@ def solve_mpc():
     x0 = compute_step(list(simX[0]) + list(simU[0]), ts, D)
     ocp_solver.set(0, 'lbx', x0)
     ocp_solver.set(0, 'ubx', x0)
+
+    if cfg.log_path:
+        path_writer.writerow([simX[0][0], simX[0][1], simU[0][0], simU[0][1]])
 
     return simX, simU
 
@@ -144,8 +153,8 @@ ax1.legend([r'$x_f - x$',r'$y_f - y$', r'$a$', r'$\alpha$'])
 ax1.set_xlabel('Time horizon')
 ax1.grid(True)
 
-ax2.set_ylim([-10, 10])
-ax2.set_xlim([-10, 10])
+ax2.set_ylim([-5, 5])
+ax2.set_xlim([-5, 5])
 ax2.set_ylabel('y-axis')
 ax2.set_xlabel('x-axis')
 
@@ -162,3 +171,6 @@ plt.show()
 
 if cfg.log_simple_time:
     simple_time_csv.close()
+
+if cfg.log_path:
+    path_csv.close()

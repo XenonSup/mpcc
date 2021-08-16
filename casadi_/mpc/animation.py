@@ -17,6 +17,11 @@ if cfg.log_simple_time:
     simple_time_csv = open(cfg.simple_time_csv, 'w')
     simple_time_writer = csv.writer(simple_time_csv)
 
+if cfg.log_path:
+    path_csv = open(cfg.path_csv, 'w')
+    path_writer = csv.writer(path_csv)
+    path_writer.writerow(['x', 'y', 'alpha', 'a'])
+
 build_solver = solver_rk4 if cfg.solve_method == 'rk4' else solver_colloc
 T = cfg.T
 N = cfg.N
@@ -49,11 +54,15 @@ def solve_mpc():
 
     if cfg.log_simple_time:
         simple_time_writer.writerow([t1-t0])
+    
     # cost = sol['f'].full().flatten()
 
     state_opt, u_opt = trajectories(sol['x'])
     state_opt = state_opt.full() # to numpy array
     u_opt = u_opt.full() # to numpy array
+
+    if cfg.log_path:
+        path_writer.writerow([state_opt[0][0], state_opt[1][0], u_opt[0][0], u_opt[1][0]])
 
     return state_opt, u_opt
 
@@ -114,6 +123,9 @@ state_opt, u_opt = trajectories(sol['x'])
 state_opt = state_opt.full() # to numpy array
 u_opt = u_opt.full() # to numpy array
 
+if cfg.log_path:
+    path_writer.writerow([state_opt[0][0], state_opt[1][0], u_opt[0][0], u_opt[1][0]])
+
 x_diff = [xf - x for x in state_opt[0]]
 y_diff = [yf - y for y in state_opt[1]]
 
@@ -173,3 +185,6 @@ if cfg.log_time:
 
 if cfg.log_simple_time:
     simple_time_csv.close()
+
+if cfg.log_path:
+    path_csv.close()

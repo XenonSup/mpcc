@@ -13,10 +13,11 @@ if use_compiled: prefix += '_compiled'
 curr_path = os.path.dirname(os.path.dirname(__file__)) # sorta hacky
 out_path = os.path.join(curr_path, 'out_mpcc')
 os.makedirs(out_path, exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpcc', 'log'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpcc', 'time'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpcc', 'time_simple'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpcc', 'eval'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'log'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'time'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'eval'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
 out_log_file = os.path.join(out_path, 'log', '_'.join([prefix, 'out.txt']))
 
@@ -24,6 +25,9 @@ log_time = False
 log_simple_time = False
 time_csv = os.path.join(out_path, 'time', '_'.join([prefix, 'time.csv']))
 simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simple_time.csv']))
+
+log_path = True
+path_csv = os.path.join(out_path, 'path', '_'.join([prefix, 'path.csv']))
 
 anim_save_file = os.path.join(out_path, prefix +'.gif')
 

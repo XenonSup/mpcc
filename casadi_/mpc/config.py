@@ -6,7 +6,7 @@ ipopt_solver = 'ma57'
 solve_method = 'colloc'
 
 gen_compiled = False
-use_compiled = True
+use_compiled = False
 
 prefix = '_'.join(['mpc', ipopt_solver, solve_method])
 if use_compiled: prefix += '_compiled'
@@ -14,17 +14,21 @@ if use_compiled: prefix += '_compiled'
 curr_path = os.path.dirname(os.path.dirname(__file__)) # sorta hacky
 out_path = os.path.join(curr_path, 'out_mpc')
 os.makedirs(out_path, exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpc', 'log'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpc', 'time'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpc', 'time_simple'), exist_ok=True)
-os.makedirs(os.path.join(curr_path, 'out_mpc', 'eval'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'log'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'time'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'eval'), exist_ok=True)
+os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
 out_log_file = os.path.join(out_path, 'log', '_'.join([prefix, 'out.txt']))
 
-log_simple_time = True
+log_simple_time = False
 log_time = False
 time_csv = os.path.join(out_path, 'time', '_'.join([prefix, 'time.csv']))
 simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simple_time.csv']))
+
+log_path = True
+path_csv = os.path.join(out_path, 'path', '_'.join([prefix, 'path.csv']))
 
 anim_save_file = os.path.join(out_path, prefix +'.gif')
 

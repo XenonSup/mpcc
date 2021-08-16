@@ -22,8 +22,8 @@ def build_ocp(init_ts, target, Tf, N, D, export_dir):
     ocp.dims.N = N
 
     # set cost
-    Q = np.diag([1e-3, 1e-3, 1e-8, 1e-8, 1e-8])
-    R = np.diag([1e-3, 1e-3])
+    Q = np.diag([1e0, 1e0, 1e-4, 1e-4, 1e-4])
+    R = np.diag([1e0, 1e0])
 
     unscale = N / Tf
 
@@ -52,7 +52,7 @@ def build_ocp(init_ts, target, Tf, N, D, export_dir):
     ocp.constraints.ubx = np.array([+deltamax, 2.])
     ocp.constraints.idxbx = np.array([3, 4])
 
-    amax = .5
+    amax = 1.0
     alphamax = np.pi
     ocp.constraints.lbu = np.array([-amax, -alphamax])
     ocp.constraints.ubu = np.array([+amax, +alphamax])
@@ -60,15 +60,13 @@ def build_ocp(init_ts, target, Tf, N, D, export_dir):
 
     ocp.constraints.x0 = init_ts
 
-    ocp.solver_options.nlp_solver_max_iter = 50
-
     # set options
     ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM' 
     # FULL_CONDENSING_QPOASES
     # PARTIAL_CONDENSING_HPIPM, FULL_CONDENSING_QPOASES, FULL_CONDENSING_HPIPM,
     # PARTIAL_CONDENSING_QPDUNES, PARTIAL_CONDENSING_OSQP
     ocp.solver_options.hessian_approx = 'GAUSS_NEWTON'
-    ocp.solver_options.integrator_type = 'IRK'
+    ocp.solver_options.integrator_type = 'ERK'
     ocp.solver_options.nlp_solver_type = 'SQP' # SQP_RTI, SQP
 
     # set prediction horizon
