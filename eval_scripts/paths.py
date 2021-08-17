@@ -65,24 +65,15 @@ for filename in os.listdir(direc):
             solver = 'DMS' if 'rk4' in filename else 'DC'
             label_prefix = library + ' ' + method + ' ' + solver
         else:
-            color = 'tab:orange'
+            color = 'tab:red'
 
             method = lgd_tmp[1]
             label_prefix = library + ' ' + method.split('.')[0]
 
-        ax1.plot(range(len(alpha)), alpha, '-', color=color, alpha=0.5, label=label_prefix + r' ($\alpha$)')
-        ax1.plot(range(len(a)), a, '--', color=color, alpha=0.5, label=label_prefix + r' ($a$)')
+        ax1.plot(range(len(alpha)), alpha, '-', color=color, alpha=0.8, label=label_prefix + r' ($\alpha$)')
+        ax1.plot(range(len(a)), a, '--', color=color, alpha=0.8, label=label_prefix + r' ($a$)')
 
-        ax2.plot(x, y, color=color, alpha=0.5, label=label_prefix)
-
-        # csv_tmp = pd.read_csv(f, header=None)
-        # print(filename)
-        # time_simple_mean = csv_tmp[0].to_numpy()[5:-5].mean()
-        # print('time_simple mean', f'{time_simple_mean:.4f}')
-        # ipopt_mean = csv_tmp['IN_IPOPT'].mean()
-        # nlp_mean = csv_tmp['IN_NLP'].mean()
-        # print('ipopt mean', f'{ipopt_mean:.4f}')
-        # print('nlp mean', f'{nlp_mean:.4f}')
+        ax2.plot(x, y, color=color, alpha=0.8, label=label_prefix)
 
 if is_mpcc:
     curve = {'init_ts': np.array([0, 0, np.pi/3, 0, 0, 0]),
@@ -115,4 +106,5 @@ ax2.set_xlim([-5, 5])
 ax1.legend()
 ax2.legend()
 
-plt.savefig(os.path.join(curr_path, 'mpcc_path_comp.png'), dpi=300)
+name_mp = 'mpcc' if is_mpcc else 'mpc'
+plt.savefig(os.path.join(curr_path, '{}_path_comp.png'.format(name_mp)), dpi=300)
