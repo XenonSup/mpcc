@@ -3,6 +3,8 @@ from acados_.mpc.model import car_model
 import numpy as np
 import scipy.linalg
 
+import acados_.mpc.config as cfg
+
 def build_ocp(init_ts, target, Tf, N, D, export_dir):
     # create ocp object to formulate the OCP
     ocp = AcadosOcp()
@@ -61,12 +63,12 @@ def build_ocp(init_ts, target, Tf, N, D, export_dir):
     ocp.constraints.x0 = init_ts
 
     # set options
-    ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM' 
+    ocp.solver_options.qp_solver = cfg.qp_solver
     # FULL_CONDENSING_QPOASES
     # PARTIAL_CONDENSING_HPIPM, FULL_CONDENSING_QPOASES, FULL_CONDENSING_HPIPM,
     # PARTIAL_CONDENSING_QPDUNES, PARTIAL_CONDENSING_OSQP
     ocp.solver_options.hessian_approx = 'GAUSS_NEWTON'
-    ocp.solver_options.integrator_type = 'ERK'
+    ocp.solver_options.integrator_type = cfg.integrator_type
     ocp.solver_options.nlp_solver_type = 'SQP' # SQP_RTI, SQP
 
     # set prediction horizon

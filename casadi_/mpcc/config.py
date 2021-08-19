@@ -7,7 +7,7 @@ solve_method = 'rk4'
 gen_compiled = False
 use_compiled = False
 
-prefix = '_'.join(['mpcc', ipopt_solver, solve_method])
+prefix = '_'.join(['CasADi', 'mpcc', ipopt_solver, solve_method])
 if use_compiled: prefix += '_compiled'
 
 curr_path = os.path.dirname(os.path.dirname(__file__)) # sorta hacky

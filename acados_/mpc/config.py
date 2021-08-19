@@ -1,6 +1,11 @@
 import os
 import numpy as np
 
+qp_solver = 'PARTIAL_CONDENSING_HPIPM'
+integrator_type = 'ERK'
+
+prefix = '_'.join(['acados', 'mpc', qp_solver.lower(), integrator_type.lower()])
+
 T = 10. # Time horizon
 N = 40  # number of control intervals
 D = 0.5 # inter-axle

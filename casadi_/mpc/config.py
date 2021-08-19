@@ -8,7 +8,7 @@ solve_method = 'colloc'
 gen_compiled = False
 use_compiled = False
 
-prefix = '_'.join(['mpc', ipopt_solver, solve_method])
+prefix = '_'.join(['CasADi', 'mpc', ipopt_solver, solve_method])
 if use_compiled: prefix += '_compiled'
 
 curr_path = os.path.dirname(os.path.dirname(__file__)) # sorta hacky
