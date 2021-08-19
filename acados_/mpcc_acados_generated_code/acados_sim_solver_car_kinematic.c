@@ -76,7 +76,7 @@ int car_kinematic_acados_sim_create(sim_solver_capsule * capsule)
     bool tmp_bool;
 
     
-    double Tsim = 0.25;
+    double Tsim = 0.025;
 
     
     // explicit ode
@@ -157,18 +157,18 @@ int car_kinematic_acados_sim_create(sim_solver_capsule * capsule)
     // initialize parameters to nominal value
     double p[12];
     
-    p[0] = -0.13845493629437283;
-    p[1] = 0.05992500482481614;
-    p[2] = 0.20059897207952213;
-    p[3] = 0.2308648431321515;
-    p[4] = 1.587855964214851;
-    p[5] = 1.359210152043032;
-    p[6] = -0.7912579663643691;
-    p[7] = -0.9303086023552128;
-    p[8] = -0.27779206638047177;
-    p[9] = -0.38528319292057894;
-    p[10] = 2.069050032744843;
-    p[11] = 2.3155917952757923;
+    p[0] = 0.989183313123146;
+    p[1] = 1.188566630957996;
+    p[2] = 0.2914474720959756;
+    p[3] = -0.16302961163316976;
+    p[4] = -3.0306307852190995;
+    p[5] = -1.7755370193247904;
+    p[6] = 0.15928740424063634;
+    p[7] = 0.2552428870705344;
+    p[8] = 0.49190136900165127;
+    p[9] = 0.07602422131474333;
+    p[10] = 1.8488112267577408;
+    p[11] = -2.331267108385236;
     capsule->sim_forw_vde_casadi[0].set_param(capsule->sim_forw_vde_casadi, p);
     capsule->sim_expl_ode_fun_casadi[0].set_param(capsule->sim_expl_ode_fun_casadi, p);
     

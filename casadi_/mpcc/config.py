@@ -67,5 +67,5 @@ curve_5 = {'init_ts': [-2.5, .5, cd.pi/4, 0, 0, 0],
            'ypts': [.5, 1.25, 2, 0, -1, 0],
            'order': 5}
 
-curves_lst = [curve_1]
+curves_lst = [curve_5]
 num_targets_final = len(curves_lst)
