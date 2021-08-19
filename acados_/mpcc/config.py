@@ -4,7 +4,7 @@ import numpy as np
 qp_solver = 'PARTIAL_CONDENSING_HPIPM'
 integrator_type = 'ERK'
 
-prefix = '_'.join(['acados', 'mpc', qp_solver.lower(), integrator_type.lower()])
+prefix = '_'.join(['acados', 'mpcc', qp_solver.split('_')[-1]])
 
 T = 10. # Time horizon
 N = 40  # number of control intervals
@@ -20,13 +20,13 @@ os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
 os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
-anim_save_file = os.path.join(out_path, '3_acados_mpcc.gif')
+anim_save_file = os.path.join(out_path, prefix + '.gif')
 
 log_simple_time = True
-simple_time_csv = os.path.join(out_path, 'time_simple', 'simple_time.csv')
+simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simple_time.csv']))
 
 log_path = True
-path_csv = os.path.join(out_path, 'path', 'path.csv')
+path_csv = os.path.join(out_path, 'path', '_'.join([prefix, 'path.csv']))
 
 ts = .08
 e = 0.1
@@ -57,5 +57,5 @@ curve_5 = {'init_ts': np.array([-2.5, .5, np.pi/4, 0, 0, 0]),
            'ypts': [.5, 1.25, 2, 0, -1, 0],
            'order': 5}
 
-curves_lst = [curve_4] # curve_1, curve_2, curve_3, curve_4, curve_5
+curves_lst = [curve_1] # curve_1, curve_2, curve_3, curve_4, curve_5
 num_targets_final = len(curves_lst)

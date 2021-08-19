@@ -29,7 +29,7 @@ simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simpl
 log_path = True
 path_csv = os.path.join(out_path, 'path', '_'.join([prefix, 'path.csv']))
 
-anim_save_file = os.path.join(out_path, prefix +'.gif')
+anim_save_file = os.path.join(out_path, prefix + '.gif')
 
 pred_csv = os.path.join(out_path, 'pred.csv')
 true_csv = os.path.join(out_path, 'true.csv')

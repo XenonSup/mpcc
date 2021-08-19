@@ -37,6 +37,7 @@
 
 
 ACADOS_FLAGS = -fPIC -std=c99   #-fno-diagnostics-show-line-numbers -g
+ACADOS_FLAGS += -DACADOS_WITH_QPOASES
 # # Debugging
 # ACADOS_FLAGS += -g3
 
@@ -81,6 +82,7 @@ casadi_fun:
 main:
 	gcc $(ACADOS_FLAGS) -c main_car_kinematic.c -I $(INCLUDE_PATH)/blasfeo/include/ -I $(INCLUDE_PATH)/hpipm/include/ \
 	-I $(INCLUDE_PATH) -I $(INCLUDE_PATH)/acados/ \
+	-I $(INCLUDE_PATH)/qpOASES_e/
 
 main_sim:
 	gcc $(ACADOS_FLAGS) -c main_sim_car_kinematic.c -I $(INCLUDE_PATH)/blasfeo/include/ -I $(INCLUDE_PATH)/hpipm/include/ \
@@ -89,26 +91,29 @@ main_sim:
 ocp_solver:
 	gcc $(ACADOS_FLAGS) -c acados_solver_car_kinematic.c -I $(INCLUDE_PATH)/blasfeo/include/ -I $(INCLUDE_PATH)/hpipm/include/ \
 	-I $(INCLUDE_PATH) -I $(INCLUDE_PATH)/acados/ \
+	-I $(INCLUDE_PATH)/qpOASES_e/
 
 sim_solver:
 	gcc $(ACADOS_FLAGS) -c acados_sim_solver_car_kinematic.c -I $(INCLUDE_PATH)/blasfeo/include/ -I $(INCLUDE_PATH)/hpipm/include/ \
 	-I $(INCLUDE_PATH) -I $(INCLUDE_PATH)/acados/ \
+	-I $(INCLUDE_PATH)/qpOASES_e/
 
 example: ocp_solver main
 	gcc $(ACADOS_FLAGS) -o main_car_kinematic $(EX_OBJ) $(OBJ) -L $(LIB_PATH) \
 	-lacados -lhpipm -lblasfeo \
-	 \
+	-lqpOASES_e \
 	-lm \
 	-I $(INCLUDE_PATH)/blasfeo/include/ \
 	-I $(INCLUDE_PATH)/hpipm/include/ \
 	-I $(INCLUDE_PATH) \
 	-I $(INCLUDE_PATH)/acados/ \
+	-I $(INCLUDE_PATH)/qpOASES_e/
 
 
 example_sim: sim_solver main_sim
 	gcc $(ACADOS_FLAGS) -o main_sim_car_kinematic $(EX_SIM_OBJ) $(MODEL_OBJ) $(SIM_OBJ) -L $(LIB_PATH) \
 	-lacados -lhpipm -lblasfeo \
-	 \
+	-lqpOASES_e \
 	-lm \
 	-I $(INCLUDE_PATH)/blasfeo/include/ \
 	-I $(INCLUDE_PATH)/acados/ \
@@ -120,7 +125,7 @@ bundled_shared_lib: casadi_fun ocp_solver sim_solver
 	-I $(INCLUDE_PATH) \
 	-L $(LIB_PATH) \
 	-lacados -lhpipm -lblasfeo \
-	 \
+	-lqpOASES_e \
 	-lm \
 
 ocp_shared_lib: casadi_fun ocp_solver
@@ -130,13 +135,13 @@ ocp_shared_lib: casadi_fun ocp_solver
 	-I $(INCLUDE_PATH) \
 	-L$(EXTERNAL_DIR) -l$(EXTERNAL_LIB) \
 	-L $(LIB_PATH) -lacados -lhpipm -lblasfeo \
-	 \
+	-lqpOASES_e \
 	-lm \
 
 sim_shared_lib: casadi_fun sim_solver
 	gcc $(ACADOS_FLAGS) -shared -o libacados_sim_solver_car_kinematic.so $(SIM_OBJ) $(MODEL_OBJ) -L$(EXTERNAL_DIR) -l$(EXTERNAL_LIB) \
 	-L $(LIB_PATH) -lacados -lhpipm -lblasfeo \
-	 \
+	-lqpOASES_e \
 	-lm \
 
 clean:

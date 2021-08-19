@@ -37,6 +37,7 @@
 
 
 ACADOS_FLAGS = -fPIC -std=c99   #-fno-diagnostics-show-line-numbers -g
+ACADOS_FLAGS += -DACADOS_WITH_OSQP
 # # Debugging
 # ACADOS_FLAGS += -g3
 

@@ -113,7 +113,7 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
     nlp_solver_plan->nlp_solver = SQP;
     
 
-    nlp_solver_plan->ocp_qp_solver_plan.qp_solver = PARTIAL_CONDENSING_HPIPM;
+    nlp_solver_plan->ocp_qp_solver_plan.qp_solver = FULL_CONDENSING_QPOASES;
 
     nlp_solver_plan->nlp_cost[0] = LINEAR_LS;
     for (int i = 1; i < N; i++)
@@ -596,11 +596,6 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
     ocp_nlp_solver_opts_set(nlp_config, capsule->nlp_opts, "levenberg_marquardt", &levenberg_marquardt);
 
     /* options QP solver */
-    int qp_solver_cond_N;
-    // NOTE: there is no condensing happening here!
-    qp_solver_cond_N = N;
-    ocp_nlp_solver_opts_set(nlp_config, capsule->nlp_opts, "qp_cond_N", &qp_solver_cond_N);
-
 
     int qp_solver_iter_max = 50;
     ocp_nlp_solver_opts_set(nlp_config, capsule->nlp_opts, "qp_iter_max", &qp_solver_iter_max);

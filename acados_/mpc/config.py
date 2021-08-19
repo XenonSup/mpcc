@@ -1,10 +1,10 @@
 import os
 import numpy as np
 
-qp_solver = 'PARTIAL_CONDENSING_HPIPM'
+qp_solver = 'FULL_CONDENSING_QPOASES'
 integrator_type = 'ERK'
 
-prefix = '_'.join(['acados', 'mpc', qp_solver.lower(), integrator_type.lower()])
+prefix = '_'.join(['acados', 'mpc', qp_solver.split('_')[-1]])
 
 T = 10. # Time horizon
 N = 40  # number of control intervals
@@ -31,10 +31,10 @@ os.makedirs(code_export_dir, exist_ok=True)
 os.makedirs(os.path.join(out_path, 'time_simple'), exist_ok=True)
 os.makedirs(os.path.join(out_path, 'path'), exist_ok=True)
 
-log_simple_time = False
-simple_time_csv = os.path.join(out_path, 'time_simple', 'simple_time.csv')
+log_simple_time = True
+simple_time_csv = os.path.join(out_path, 'time_simple', '_'.join([prefix, 'simple_time.csv']))
 
 log_path = True
-path_csv = os.path.join(out_path, 'path', 'path.csv')
+path_csv = os.path.join(out_path, 'path', '_'.join([prefix, 'path.csv']))
 
-anim_save_file = os.path.join(out_path, 'acados_mpc.gif')
+anim_save_file = os.path.join(out_path, prefix + '.gif')

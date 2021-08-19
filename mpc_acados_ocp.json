@@ -618,7 +618,7 @@
         "nlp_solver_tol_stat": 1e-06,
         "nlp_solver_type": "SQP",
         "print_level": 0,
-        "qp_solver": "PARTIAL_CONDENSING_HPIPM",
+        "qp_solver": "FULL_CONDENSING_QPOASES",
         "qp_solver_cond_N": null,
         "qp_solver_iter_max": 50,
         "qp_solver_tol_comp": null,

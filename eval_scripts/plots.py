@@ -1,14 +1,23 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from cycler import cycler
 
 curr_path = os.path.dirname(__file__) # sorta hacky
 
 plt.style.use('ggplot')
 
 fig, ax = plt.subplots(figsize=(10, 5))
+ax.grid(True)
+ax.tick_params(direction='in')
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+colors = ['tab:red', 'tab:orange', 'tab:green', 'tab:blue', 'tab:purple', 'tab:brown']
 col_i = 0
-colors = ['tab:blue', 'tab:green', 'tab:orange', 'tab:red', 'tab:purple']
 legend = []
 
 direc = os.path.join(curr_path, 'mpcc_data')
@@ -20,23 +29,22 @@ for filename in os.listdir(direc):
 
         lgd_tmp = filename.split('_')
         library = lgd_tmp[0]
-        ln_style = 'solid'
         if library == 'CasADi':
-            mark_style = '.' if 'rk4' in filename else 's'
-
             method = lgd_tmp[1]
             solver = 'DMS' if 'rk4' in filename else 'DC'
-            legend.append(library + ' ' + method + ' ' + solver + ' ({:.3f})'.format(csv_tmp.mean()))
-        else:
-            mark_style = '^'
+            marker = '.'
+            msize = 6
 
-            method = lgd_tmp[1]
-            legend.append(library + ' ' + method.split('.')[0] + ' ({:.3f})'.format(csv_tmp.mean()))
-
-        if mark_style == 's' or mark_style == '^':
-            ax.plot(range(csv_tmp.shape[0]), csv_tmp, marker=mark_style, linestyle=ln_style, markersize=5, color=colors[col_i], alpha=0.3)
         else:
-            ax.plot(range(csv_tmp.shape[0]), csv_tmp, marker=mark_style, linestyle=ln_style, color=colors[col_i], alpha=0.3)
+            method = lgd_tmp[1].split('.')[0]
+            solver = 'DMS'
+            marker = '^'
+            msize = 4
+        
+        legend.append(library + ' ' + method + ' ' + solver + ' ({:.3f})'.format(csv_tmp.mean()))
+
+        ax.plot(range(csv_tmp.shape[0]), csv_tmp, color=colors[col_i], marker=marker, markersize=msize, alpha=0.3)
+
         col_i += 1
 
         # csv_tmp = pd.read_csv(f, header=None)
@@ -51,7 +59,6 @@ for filename in os.listdir(direc):
 ax.set_title('MPCC Timing Stats (T=10 N=40)')
 ax.set_ylabel('Seconds')
 ax.set_xlabel('Iteration Number')
-# ax.set_ylim([0.0, 0.08])
+# ax.set_ylim([0.0, 0.09])
 plt.legend(legend)
-plt.grid(True)
 plt.savefig(os.path.join(curr_path, 'mpcc_simple_time_stats.png'), dpi=300)

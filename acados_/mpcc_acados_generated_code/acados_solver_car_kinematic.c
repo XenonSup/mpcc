@@ -115,7 +115,7 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
     nlp_solver_plan->nlp_solver = SQP;
     
 
-    nlp_solver_plan->ocp_qp_solver_plan.qp_solver = PARTIAL_CONDENSING_HPIPM;
+    nlp_solver_plan->ocp_qp_solver_plan.qp_solver = PARTIAL_CONDENSING_OSQP;
 
     nlp_solver_plan->nlp_cost[0] = EXTERNAL;
     for (int i = 1; i < N; i++)
@@ -357,7 +357,7 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
 
     // set up time_steps
     // all time_steps are identical
-    double time_step = 0.025;
+    double time_step = 0.25;
     for (int i = 0; i < N; i++)
     {
         ocp_nlp_in_set(nlp_config, nlp_dims, nlp_in, i, "Ts", &time_step);
@@ -410,12 +410,8 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
     double* lbx0 = lubx0;
     double* ubx0 = lubx0 + NBX0;
     // change only the non-zero elements:
-    lbx0[0] = 1;
-    ubx0[0] = 1;
-    lbx0[1] = -4.5;
-    ubx0[1] = -4.5;
-    lbx0[2] = 2.356194490192345;
-    ubx0[2] = 2.356194490192345;
+    lbx0[2] = 1.0471975511965976;
+    ubx0[2] = 1.0471975511965976;
 
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "idxbx", idxbx0);
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "lbx", lbx0);
@@ -611,9 +607,7 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
 
     // initialize with x0
     
-    x0[0] = 1;
-    x0[1] = -4.5;
-    x0[2] = 2.356194490192345;
+    x0[2] = 1.0471975511965976;
 
 
     double* u0 = xu0 + NX;
@@ -635,18 +629,18 @@ int car_kinematic_acados_create(nlp_solver_capsule * capsule)
     // initialize parameters to nominal value
     double* p = calloc(NP, sizeof(double));
     
-    p[0] = 0.989183313123146;
-    p[1] = 1.188566630957996;
-    p[2] = 0.2914474720959756;
-    p[3] = -0.16302961163316976;
-    p[4] = -3.0306307852190995;
-    p[5] = -1.7755370193247904;
-    p[6] = 0.15928740424063634;
-    p[7] = 0.2552428870705344;
-    p[8] = 0.49190136900165127;
-    p[9] = 0.07602422131474333;
-    p[10] = 1.8488112267577408;
-    p[11] = -2.331267108385236;
+    p[0] = -0.13845493629437283;
+    p[1] = 0.05992500482481614;
+    p[2] = 0.20059897207952213;
+    p[3] = 0.2308648431321515;
+    p[4] = 1.587855964214851;
+    p[5] = 1.359210152043032;
+    p[6] = -0.7912579663643691;
+    p[7] = -0.9303086023552128;
+    p[8] = -0.27779206638047177;
+    p[9] = -0.38528319292057894;
+    p[10] = 2.069050032744843;
+    p[11] = 2.3155917952757923;
 
     for (int i = 0; i <= N; i++)
     {
