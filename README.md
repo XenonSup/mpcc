@@ -1,4 +1,4 @@
-# Model Predictive Control (MPC)
+# Model Predictive Control (MPC) & Model Predictive Contouring Control (MPCC)
 
 Implemented:
 - CasADi (found in folder `casadi_`):
