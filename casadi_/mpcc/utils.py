@@ -35,8 +35,9 @@ def get_curve(curve, prev=None):
     tpts = gen_t(xpts, ypts)
     xpoly = np.polynomial.polynomial.Polynomial.fit(tpts, xpts, order)
     ypoly = np.polynomial.polynomial.Polynomial.fit(tpts, ypts, order)
-    cx = list(xpoly)[::-1]
-    cy = list(ypoly)[::-1]
+
+    cx = xpoly.convert().coef[::-1]
+    cy = ypoly.convert().coef[::-1]
     
     return xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order
 
