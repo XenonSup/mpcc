@@ -1,13 +1,25 @@
 import casadi as cd
 
 def poly_deriv(coefs, order):
+    """Returns vector of coefficients for the derivative of
+        a given polynomial"""
     coef_d = cd.SX.sym('c_deriv', order, 1)
     for i in range(coef_d.shape[0]):
         coef_d[i] = (order - i) * coefs[i]
     return coef_d
 
 def gen_cost_func(order):
-
+    """Generate a callable cost function
+    
+    Generate a callable cost function which takes in as
+    Inputs:
+        pos (x,y), a(cceleration), alpha(steering wheel acc),
+        dt (timestep), t (progress along curve), t_dest,
+        cx, cy
+    
+    Output: Numeric cost
+    """
+    # variables
     a = cd.SX.sym('a')
     alpha = cd.SX.sym('alpha')
     dt = cd.SX.sym('dt')

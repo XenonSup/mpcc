@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import casadi_.mpcc.config as cfg
 
 def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
+    # State variables
     x = cd.SX.sym('x')
     y = cd.SX.sym('y')
     phi = cd.SX.sym('phi')
@@ -20,17 +21,22 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
 
     z = cd.vertcat(x, y, phi, delta, vx, theta)
 
+    # Control variables
     alphaux = cd.SX.sym('alphaux')
     aux = cd.SX.sym('aux')
     dt = cd.SX.sym('dt')
 
     u = cd.vertcat(alphaux, aux, dt)
 
+    # State evolution
     zdot = cd.vertcat(vx*cd.cos(phi), vx*cd.sin(phi), (vx/D)*cd.tan(delta), alphaux, aux, vx*dt)
 
+    # Contours
+            #  sym(name,   nrow   , ncol)
     xc = cd.SX.sym('xc', order + 1, 1)
     yc = cd.SX.sym('yc', order + 1, 1)
     contour_cost = gen_cost_func(order)
+    # Cost is only a function of order
 
     L = contour_cost(pos=cd.vertcat(x, y), a=aux, alpha=alphaux, dt=dt, t=theta, t_dest=1.0, cx=xc, cy=yc)['cost']
 
@@ -145,11 +151,13 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     prob = {'f': J, 'x': w, 'g': g, 'p': cd.vertcat(xc, yc)}
     solver = cd.nlpsol('solver', 'ipopt', prob, merge_dict(solver_opts, warm_start_opts))
 
+    nlp_solver_file = cfg.comp_bin_path
+
     if cfg.gen_compiled:
         solver.generate_dependencies('nlp.c')                                        
         system('gcc -fPIC -shared -O3 nlp.c -o nlp.so')
     if cfg.use_compiled:
-        solver = cd.nlpsol('solver', 'ipopt', 'nlp.so', merge_dict(solver_opts, warm_start_opts))
+        solver = cd.nlpsol('solver', 'ipopt', nlp_solver_file, merge_dict(solver_opts, warm_start_opts))
     # Function to get x and u trajectories from w
     trajectories = cd.Function('trajectories', [w], [coord_plot, u_plot], ['w'], ['x', 'u'])
 

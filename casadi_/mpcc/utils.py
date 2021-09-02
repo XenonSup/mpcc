@@ -11,16 +11,44 @@ def get_timing(txt):
     return time
 
 def gen_t(pts1, pts2):
+    """ Generate a (normalized) piecewise linear distance vector
+        from start coordinates to each subsequent set of coordinates
+        For use as a progress-along-path variable
+
+    Args:
+        pts1 (list): x-coordinates
+        pts2 (list): y-coordinates
+
+    Returns:
+        list: normalized distances 
+    """
     tpts = [0]
     for i, pt in enumerate(pts1):
         if i != 0:
+            # Piecewise linear distance
             dist_tmp = (pts1[i] - pts1[i-1]) ** 2 + (pts2[i] - pts2[i-1]) ** 2
             tpts += [cd.sqrt(dist_tmp) + tpts[-1]]
+    
+    # Normalize    
     maxt = tpts[-1]
     tpts = [t/maxt for t in tpts]
+    
     return tpts
 
 def get_curve(curve, prev=None):
+    """ Generate a polynomial path from initial conditions
+    and waypoints
+
+    Args:
+        curve (dict): defines initial conditions, x-y waypoints
+            and order of poly
+        prev (list, optional): overrides initial conditions
+            with terminal conditions of previous path.
+            Defaults to None.
+
+    Returns:
+        [list]: xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order
+    """
     xpts, ypts = curve['xpts'], curve['ypts']
     order = curve['order']
 
@@ -29,10 +57,11 @@ def get_curve(curve, prev=None):
     else:
         init_ts = curve['init_ts']
     
+    # Extract start and finish coordinates
     xs, ys = xpts[0], ypts[0]
     xf, yf = xpts[-1], ypts[-1]
 
-    tpts = gen_t(xpts, ypts)
+    tpts = gen_t(xpts, ypts) # Get progress variable
     xpoly = np.polynomial.polynomial.Polynomial.fit(tpts, xpts, order)
     ypoly = np.polynomial.polynomial.Polynomial.fit(tpts, ypts, order)
 
@@ -42,6 +71,19 @@ def get_curve(curve, prev=None):
     return xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order
 
 def compute_step(init, ts, D): # init = [x, y, phi, delta, vx, theta, alphaux, aux, dt]
+    """simulate vehicle dynamics
+
+    Args:
+        init (list): w-vector
+        ts (float): timestep length
+        D (float): inter-axle distance
+
+    Returns:
+        list: z_{t+ts}
+    """
+    ## How is dt different from ts?
+    ## Is dt computed and ts simulated/expected?
+    
     x, y, phi, delta, v, theta, alpha, a, dt = init
     
     x_ts = x + v*cd.cos(phi)*ts

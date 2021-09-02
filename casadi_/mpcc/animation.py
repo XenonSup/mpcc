@@ -14,6 +14,7 @@ from casadi_.solvers.mpcc_colloc import build_solver as solver_colloc
 
 plt.style.use('ggplot')
 
+# Logging
 if cfg.log_simple_time:
     simple_time_csv = open(cfg.simple_time_csv, 'w')
     simple_time_writer = csv.writer(simple_time_csv)
@@ -24,6 +25,8 @@ if cfg.log_path:
     path_writer.writerow(['x', 'y', 'alpha', 'a'])
 
 build_solver = solver_rk4 if cfg.solve_method == 'rk4' else solver_colloc
+
+# Problem parameters
 T = cfg.T
 N = cfg.N
 inter_axle = cfg.inter_axle
@@ -37,6 +40,7 @@ num_targets = 0
 
 fig, (ax1, ax2) =  plt.subplots(1, 2, figsize=(10, 5))
 
+# Initial path
 curve = cfg.curves_lst[0]
 xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order = get_curve(curve)
 
