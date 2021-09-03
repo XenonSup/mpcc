@@ -29,15 +29,13 @@ def gen_t(pts1, pts2):
     return tpts
 
 # %%
-def l_polyval(xpts, coef):
-    
-    return ypts
 
 def l_polyfit(tpts,xpts,ypts,order, method=0):
 
     full_tpts = np.linspace(min(tpts),max(tpts))
 
     if method == 0:
+        # Deprecated?
         xpoly = np.polyfit(tpts,xpts,order) # Highest power first
         ypoly = np.polyfit(tpts,ypts,order)
         xcal = np.polyval(xpoly,tpts)
@@ -46,14 +44,18 @@ def l_polyfit(tpts,xpts,ypts,order, method=0):
         yful = np.polyval(ypoly,full_tpts)
     
     elif method == 1:
-        xpoly = np.polynomial.polynomial.Polynomial.fit(tpts,xpts,order).convert().coef
-        ypoly = np.polynomial.polynomial.Polynomial.fit(tpts,ypts,order).convert().coef
-        xcal = np.polynomial.polynomial.polyval(tpts,list(xpoly))
-        ycal = np.polynomial.polynomial.polyval(tpts,list(ypoly))
-        xful = np.polynomial.polynomial.polyval(full_tpts,list(xpoly))
-        yful = np.polynomial.polynomial.polyval(full_tpts,list(ypoly))
+        # New
+        xpoly = np.polynomial.polynomial.Polynomial.fit(tpts,xpts,order)
+        ypoly = np.polynomial.polynomial.Polynomial.fit(tpts,ypts,order)
+        xc = xpoly.convert().coef
+        xy = ypoly.convert().coef
+        xcal = np.polynomial.polynomial.polyval(tpts,xc)
+        ycal = np.polynomial.polynomial.polyval(tpts,xy)
+        xful = np.polynomial.polynomial.polyval(full_tpts,xc)
+        yful = np.polynomial.polynomial.polyval(full_tpts,xy)
 
     elif method == 2:
+        # Wrong
         xpoly = np.polynomial.polynomial.Polynomial.fit(tpts,xpts,order)
         ypoly = np.polynomial.polynomial.Polynomial.fit(tpts,ypts,order)
         xcal = np.polynomial.polynomial.polyval(tpts,list(xpoly))
@@ -65,9 +67,10 @@ def l_polyfit(tpts,xpts,ypts,order, method=0):
 
 # %%
 # Clear
-xpts = [5,1,2,3,4]
+xpts = [0,1,2,3,4]
 ypts = [0,2,6,5,4]
 tpts = gen_t(xpts,ypts)
+tful = np.linspace(0,1)
 
 xmin = min(xpts)-1
 xmax = max(xpts)+1
@@ -87,7 +90,8 @@ for ind, order in enumerate(orders):
 
     plt.plot(xpts,ypts, 'bx', markersize=8)
     plt.plot(xcal,ycal, 'r+', markersize=8)
-    plt.plot(xful,yful, 'g.', markersize=4)
+    plt.plot(xful,yful, 'g.', markersize=8)
+    plt.plot(xpoly(tful),ypoly(tful), 'y^', markersize=2)
 
     # plt.plot(tpts,ypts, 'bx', markersize=8)
     # plt.plot(tpts,ycal, 'r+', markersize=8)

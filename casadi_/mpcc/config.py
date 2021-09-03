@@ -13,7 +13,9 @@ if gen_compiled or use_compiled:
     # Store path to compiled binary
     comp_bin_name = '_'.join([ipopt_solver, solve_method, mpc_type])
     comp_dir      = os.path.join('compiled_casadi', mpc_type, comp_bin_name, 'nlp.so')
-    comp_bin_path = os.path.abspath(comp_dir)
+    # comp_bin_path = os.path.abspath(comp_dir)
+    comp_bin_path = os.path.abspath('./nlp.so')
+    print( "Compiled Binary Path: "+ comp_bin_path)
 
 
 ##### BEGIN ACCESSORY #####
@@ -50,6 +52,7 @@ anim_save_file = os.path.join(out_path, prefix + '.gif')
 pred_csv = os.path.join(out_path, 'pred.csv')
 true_csv = os.path.join(out_path, 'true.csv')
 
+plot_sparsity = False
 ##### END ACCESSORY #####
 
 # Probem Parameters
@@ -64,6 +67,11 @@ e = 0.1 # epsilon (value for when solving stops)
 ### Routes
 
 # 5th-order
+#'init_ts': [x, y, phi (orientation),
+#           delta (steering wheel velocity), v_x (speed),
+#           theta (progress along path [0,1])
+#           ]
+
 curve_1 = {'init_ts': [0, 0, cd.pi/3, 0, 0, 0],
            'xpts': [0, .5, 2, 3.3],
            'ypts': [0, 1, 3, 2],
@@ -89,5 +97,5 @@ curve_5 = {'init_ts': [-2.5, .5, cd.pi/4, 0, 0, 0],
            'ypts': [.5, 1.25, 2, 0, -1, 0],
            'order': 5}
 
-curves_lst = [curve_5]
+curves_lst = [curve_2, curve_3]
 num_targets_final = len(curves_lst)

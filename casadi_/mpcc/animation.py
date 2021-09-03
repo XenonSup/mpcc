@@ -46,7 +46,10 @@ xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order = get_cur
 
 print(cx, cy)
 
+# Generate cost function for given order
+# Can supply any curve and any state otherwise
 cost_func = gen_cost_func(order)
+
 solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
 w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = params
 

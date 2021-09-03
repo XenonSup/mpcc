@@ -9,7 +9,7 @@ def poly_deriv(coefs, order):
     return coef_d
 
 def gen_cost_func(order):
-    """Generate a callable cost function
+    """Generate a callable cost (Casadi) function
     
     Generate a callable cost function which takes in as
     Inputs:

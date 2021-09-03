@@ -11,7 +11,30 @@ import matplotlib.pyplot as plt
 import casadi_.mpcc.config as cfg
 
 def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
-    # State variables
+    """Builds and returns the nlp solver.
+    
+    Builds and returns the NLP problem, along with the necessary
+    parameters and a helper plotting function based on the problem
+    description.
+    
+    Assumes Bicycle Kinematic model.
+
+    Args:
+        init_ts (list): Initial state [x, y, phi, delta, v_x, theta]
+        T (float): Time horizon
+        N (int): Number of control intervals
+        D (float): inter-axle distance
+        order (int): order of the polynomial curve to follow
+        xpoly (Numpy Polynomial): X-polynomial
+        ypoly (Numpy Polynomial): y-polynomial
+
+    Returns:
+        solver (function): nlp solver function
+        params (list): [w0[6:], lbw[6:], ubw[6:], lbg, ubg]
+        trajectories (function): splits and reshapes the state vector w into
+            x and u
+    """
+    # Define State variables
     x = cd.SX.sym('x')
     y = cd.SX.sym('y')
     phi = cd.SX.sym('phi')
@@ -21,33 +44,40 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
 
     z = cd.vertcat(x, y, phi, delta, vx, theta)
 
-    # Control variables
+    # Define Control variables
     alphaux = cd.SX.sym('alphaux')
     aux = cd.SX.sym('aux')
     dt = cd.SX.sym('dt')
 
     u = cd.vertcat(alphaux, aux, dt)
 
-    # State evolution
+    # Dynamic model of state evolution (Kinematic bicycle)
     zdot = cd.vertcat(vx*cd.cos(phi), vx*cd.sin(phi), (vx/D)*cd.tan(delta), alphaux, aux, vx*dt)
 
-    # Contours
+    # x & y polynomial coefficients
             #  sym(name,   nrow   , ncol)
     xc = cd.SX.sym('xc', order + 1, 1)
     yc = cd.SX.sym('yc', order + 1, 1)
-    contour_cost = gen_cost_func(order)
-    # Cost is only a function of order
 
+    # GenericCost function is only a function of order
+    contour_cost = gen_cost_func(order)
+
+    # Remap? cost function to defined variables
     L = contour_cost(pos=cd.vertcat(x, y), a=aux, alpha=alphaux, dt=dt, t=theta, t_dest=1.0, cx=xc, cy=yc)['cost']
 
-    # Fixed step Runge-Kutta 4 integrator
+    ###  Fixed step Runge-Kutta 4 integrator
     M = 4 # RK4 steps per interval
-    DT = T/N/M
-    f = cd.Function('f', [z, u], [zdot, L])
+    
+    # Timestep = (Time Horizon / no. of Intervals) / no. of Steps
+    DT = T/N/M  
+    
+    ## How are xc & yc provided for L?
+    f = cd.Function('f', [z, u], [zdot, L]) # fname, SX_in, SX_out
+    
     X0 = cd.SX.sym('X0', 6)
     U = cd.SX.sym('U', 3)
     X = X0
-    Q = 0
+    Q = 0                       # Cost?
     for j in range(M):
         k1, k1_q = f(X, U)
         k2, k2_q = f(X + DT/2 * k1, U)
@@ -68,7 +98,7 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     lbg = []
     ubg = []
 
-    # For plotting x and u given w
+    # For plotting x and u trajectories given w
     coord_plot = []
     u_plot = []
 
@@ -97,18 +127,30 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         J=J+Fk['qf']
 
         kf = float(k)
-        theta_tmp = kf/(N-1)
-        dtheta = 0.2
+        theta_tmp = kf/(N-1)  # Percentage progress in intervals
+        dtheta = 0.2          # MAGIC NUMBER
 
         # New NLP variable for state at end of interval
         Xk = cd.SX.sym('X_' + str(k+1), 6)
         w   += [Xk]
+        # vx, delta lb & ub = MAGIC NUMBERS!
         #          x         y       phi     delta   vx theta
-        lbw += [-cd.inf, -cd.inf, -cd.inf, -cd.pi/4,  0, 0]
+        lbw += [-cd.inf, -cd.inf, -cd.inf, -cd.pi/4,  0, 0] 
         ubw += [ cd.inf,  cd.inf,  cd.inf,  cd.pi/4,  2, 1]
+        
+        # Initial guess for x-y position and orientation
+        # Assumes progress along control intervals
+        # maps linearly to progress along curve
+        ## This is the only place xpoly & ypoly are used
+        ## 1. Can they be safely removed and replaced with a random guess?
+        ## 2. xc & yc are input parameters already. Can I use polyval with them
+        ## instead ?
+        ## 3. Supply 0's instead?
+        ## 4. Supply x0 as guesses -> Can't be very var
         x_tmp, y_tmp = xpoly(theta_tmp), ypoly(theta_tmp)
         theta_step = theta_tmp + dtheta
         phi_tmp = cd.arctan((ypoly(theta_step) - y_tmp)/(xpoly(theta_step) - x_tmp))
+
         w0  += [xpoly(theta_tmp), ypoly(theta_tmp), phi_tmp, 0, rd.randint(0, 200)/1000., theta_tmp]
         coord_plot += [Xk]
 
@@ -118,15 +160,16 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         ubg += [0, 0, 0, 0, 0, 0]
     
     # Concatenate vectors
-    w = cd.vertcat(*w)
-    g = cd.vertcat(*g)
-    coord_plot = cd.horzcat(*coord_plot)
-    u_plot = cd.horzcat(*u_plot)
+    w = cd.vertcat(*w)  # ((6+3)*N + 6) x 1 column vector
+    g = cd.vertcat(*g)  # 6*N x 1 column vector
+    coord_plot = cd.horzcat(*coord_plot)  # 6 x (N+1) 
+    u_plot = cd.horzcat(*u_plot)          # 3 x N
 
     # plot sparsity
-    sg = cd.sum1(g)
-    sparsity = cd.jacobian(cd.jacobian(sg, w), w).sparsity()
-    plt.imsave(os.path.join(cfg.out_path, 'sparsity_mpcc_rk4.png'), np.array(sparsity))
+    if cfg.plot_sparsity:
+        sg = cd.sum1(g)
+        sparsity = cd.jacobian(cd.jacobian(sg, w), w).sparsity()
+        plt.imsave(os.path.join(cfg.out_path, 'sparsity_mpcc_rk4.png'), np.array(sparsity))
 
     # Create an NLP solver
     solver_opts = {}
@@ -148,16 +191,22 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     warm_start_opts['ipopt.warm_start_slack_bound_push'] = 1e-9
     warm_start_opts['ipopt.warm_start_mult_bound_push'] = 1e-9
 
-    prob = {'f': J, 'x': w, 'g': g, 'p': cd.vertcat(xc, yc)}
-    solver = cd.nlpsol('solver', 'ipopt', prob, merge_dict(solver_opts, warm_start_opts))
+    if cfg.gen_compiled or not cfg.use_compiled:  # Create base solver
 
-    nlp_solver_file = cfg.comp_bin_path
+        # Formulate the (MX) nlp
+        prob = {'f': J, 'x': w, 'g': g, 'p': cd.vertcat(xc, yc)}
+        # Create the solver
+        solver = cd.nlpsol('solver', 'ipopt', prob, merge_dict(solver_opts, warm_start_opts))
 
-    if cfg.gen_compiled:
-        solver.generate_dependencies('nlp.c')                                        
-        system('gcc -fPIC -shared -O3 nlp.c -o nlp.so')
-    if cfg.use_compiled:
+        if cfg.gen_compiled:  
+            # Push the nlp formulation to C & compile a binary
+            solver.generate_dependencies('nlp.c')                                        
+            system('gcc -fPIC -shared -O0 nlp.c -o nlp.so')
+
+    if cfg.use_compiled:  # Create binary solver
+        nlp_solver_file = cfg.comp_bin_path
         solver = cd.nlpsol('solver', 'ipopt', nlp_solver_file, merge_dict(solver_opts, warm_start_opts))
+
     # Function to get x and u trajectories from w
     trajectories = cd.Function('trajectories', [w], [coord_plot, u_plot], ['w'], ['x', 'u'])
 
