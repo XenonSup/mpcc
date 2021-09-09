@@ -62,11 +62,21 @@ def get_curve(curve, prev=None):
     xf, yf = xpts[-1], ypts[-1]
 
     tpts = gen_t(xpts, ypts) # Get progress variable
+
     xpoly = np.polynomial.polynomial.Polynomial.fit(tpts, xpts, order)
     ypoly = np.polynomial.polynomial.Polynomial.fit(tpts, ypts, order)
 
-    cx = xpoly.convert().coef[::-1]
-    cy = ypoly.convert().coef[::-1]
+    poly_version = 0
+    if poly_version == 0:
+
+        cx = list(xpoly)[::-1]
+        cy = list(ypoly)[::-1]
+    else:
+        # The "correct" coefficients result in worse solutions
+        cx = xpoly.convert().coef[::-1]
+        cy = ypoly.convert().coef[::-1]
+        xpoly = xpoly.convert()
+        ypoly = ypoly.convert()
     
     return xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order
 

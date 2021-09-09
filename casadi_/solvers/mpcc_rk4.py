@@ -72,6 +72,7 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     DT = T/N/M  
     
     ## How are xc & yc provided for L?
+    # Continuous time dynamics
     f = cd.Function('f', [z, u], [zdot, L]) # fname, SX_in, SX_out
     
     X0 = cd.SX.sym('X0', 6)
@@ -147,11 +148,13 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         ## instead ?
         ## 3. Supply 0's instead?
         ## 4. Supply x0 as guesses -> Can't be very var
+        ## 5. interpolate linear line between x0 and xf
         x_tmp, y_tmp = xpoly(theta_tmp), ypoly(theta_tmp)
         theta_step = theta_tmp + dtheta
         phi_tmp = cd.arctan((ypoly(theta_step) - y_tmp)/(xpoly(theta_step) - x_tmp))
 
-        w0  += [xpoly(theta_tmp), ypoly(theta_tmp), phi_tmp, 0, rd.randint(0, 200)/1000., theta_tmp]
+        # w0  += [xpoly(theta_tmp), ypoly(theta_tmp), phi_tmp, 0, rd.randint(0, 200)/1000., theta_tmp]
+        w0 += [0, 0, 0, 0, 0, theta_tmp]
         coord_plot += [Xk]
 
         # Add equality constraint

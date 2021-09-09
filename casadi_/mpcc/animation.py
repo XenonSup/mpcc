@@ -14,7 +14,7 @@ from casadi_.solvers.mpcc_colloc import build_solver as solver_colloc
 
 plt.style.use('ggplot')
 
-# Logging
+# Logging: Prep
 if cfg.log_simple_time:
     simple_time_csv = open(cfg.simple_time_csv, 'w')
     simple_time_writer = csv.writer(simple_time_csv)
@@ -34,11 +34,13 @@ inter_axle = cfg.inter_axle
 ts = cfg.ts
 e = cfg.e
 
-rebuild_solver = False
-keep_going = True
+rebuild_solver = False  # On first curve
+keep_going = True       # Target not reached
 num_targets = 0
 
 fig, (ax1, ax2) =  plt.subplots(1, 2, figsize=(10, 5))
+
+### Begin Initialization
 
 # Initial path
 curve = cfg.curves_lst[0]
@@ -205,6 +207,8 @@ writergif = animation.PillowWriter(fps=30)
 anim = animation.FuncAnimation(fig, update, interval=100, frames=gen, save_count=3000)
 # anim.save(cfg.anim_save_file, writer=writergif)
 plt.show()
+
+### Logging: Conclude 
 
 if cfg.log_time:
     with open(cfg.out_log_file, 'r') as f:

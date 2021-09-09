@@ -7,14 +7,14 @@ ipopt_solver = 'mumps'  # mumps OR ma57
 solve_method = 'rk4'    # rk4 OR colloc 
 
 gen_compiled = False
-use_compiled = True
+use_compiled = False
 
 if gen_compiled or use_compiled:
     # Store path to compiled binary
     comp_bin_name = '_'.join([ipopt_solver, solve_method, mpc_type])
     comp_dir      = os.path.join('compiled_casadi', mpc_type, comp_bin_name, 'nlp.so')
-    # comp_bin_path = os.path.abspath(comp_dir)
-    comp_bin_path = os.path.abspath('./nlp.so')
+    comp_bin_path = os.path.abspath(comp_dir)
+    # comp_bin_path = os.path.abspath('./nlp.so')
     print( "Compiled Binary Path: "+ comp_bin_path)
 
 
@@ -58,7 +58,7 @@ plot_sparsity = False
 # Probem Parameters
 
 T = 10. # Time horizon
-N = 40  # number of control intervals
+N = 60  # number of control intervals
 inter_axle = 0.5   # inter-axle distance
 
 ts = .08 # time-step
@@ -97,5 +97,5 @@ curve_5 = {'init_ts': [-2.5, .5, cd.pi/4, 0, 0, 0],
            'ypts': [.5, 1.25, 2, 0, -1, 0],
            'order': 5}
 
-curves_lst = [curve_2, curve_3]
+curves_lst = [curve_1, curve_3, curve_4]
 num_targets_final = len(curves_lst)
