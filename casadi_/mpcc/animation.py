@@ -1,5 +1,6 @@
 from casadi_.mpcc.utils import get_curve, compute_step, get_timing
 from casadi_.mpcc.loss import gen_cost_func
+from casadi_.mpcc.bounds import BoundAndGuess
 
 import casadi as cd
 import matplotlib.pyplot as plt
@@ -52,24 +53,49 @@ print(cx, cy)
 # Can supply any curve and any state otherwise
 cost_func = gen_cost_func(order)
 
-solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
-w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = params
+# solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
+# w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = params
+solver, _, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
 
+bounds = BoundAndGuess(init_ts, N, xpoly, ypoly)
+w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = bounds.get_bounds_suffix()
+
+# Append the initial state
+w0 = init_ts + w0_suffix
+lbw = init_ts + lbw_suffix
+ubw = init_ts + ubw_suffix
+
+# Run first instance of solver, get solutions
+sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
+
+w_opt = sol['x'].full().flatten()
+state_opt, u_opt = trajectories(sol['x'])
+state_opt = state_opt.full() # to numpy array
+u_opt = u_opt.full() # to numpy array
+
+if cfg.log_path:
+    path_writer.writerow([state_opt[0][0], state_opt[1][0], u_opt[0][0], u_opt[1][0]])
 def solve_mpcc():
     global sol, rebuild_solver
 
     if rebuild_solver:
         global solver, params, trajectories, w0_suffix, lbw_suffix, ubw_suffix
-        solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
-        w0_suffix, lbw_suffix, ubw_suffix, _, _ = params
-        print('Rebuilt solver')
-        rebuild_solver = False
+        # solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
+
+        # w0_suffix, lbw_suffix, ubw_suffix, _, _ = params
+
+        w0_suffix, lbw_suffix, ubw_suffix, _, _ = bounds.update(init_ts, xpoly, ypoly, suffix=True)
 
         w0 = init_ts + w0_suffix
         lbw = init_ts + lbw_suffix
         ubw = init_ts + ubw_suffix
 
+        # w0, lbw, ubw, _, _ = bounds.update(init_ts, xpoly, ypoly, suffix=False)
+
         sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
+
+        print('Rebuilt solver')
+        rebuild_solver = False
     else:
         lbw = init_ts + lbw_suffix
         ubw = init_ts + ubw_suffix
@@ -92,30 +118,63 @@ def solve_mpcc():
     return state_opt, u_opt
 
 def gen():
+    # Yields a dummy frame number to keep solver animation going
     global keep_going, num_targets
     i = 0
+    # Keeps yielding as long as there are still targets
     while num_targets < cfg.num_targets_final:
+
+        # If reached intermediate target
         if not keep_going:
-            num_targets += 1
+
+            num_targets += 1 # increment target tracker
+
+            # if there still are targets
             if num_targets < cfg.num_targets_final:
+
                 global xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order, xplt, yplt
+
+                # Update curve
                 curve = cfg.curves_lst[num_targets]
-                xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order = get_curve(curve)
+                xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order = get_curve(curve, prev=init_ts)
                 print('Updated init_ts')
+
+                # Update curve plot
                 tplt = np.linspace(0, 1)
                 xplt = xpoly(tplt)
                 yplt = ypoly(tplt)
-            else: break
-            print('number of targets reached:', num_targets)
-            keep_going = True
+                
+                # Used to be in the outer if, after the else
+                print('number of targets reached:', num_targets)
+                keep_going = True
+
+            # if there are no more targets: Stop iteration
+            else: break 
+
+
         else: i += 1
         yield i
 
 def update(i):
     global init_ts, keep_going, rebuild_solver
 
+    # Solve the MPCC problem, get state and control vectors
     state_opt, u_opt = solve_mpcc()
 
+    # Get the first state and control vectors from the solution
+    # Initial state vector should match the initial conditions
+    init = [state_opt[0][0], state_opt[1][0], state_opt[2][0], state_opt[3][0], state_opt[4][0], state_opt[5][0], u_opt[0][0], u_opt[1][0], u_opt[2][0]]
+
+    # Simulate the state forward one step, acquire new initial conditions
+    init_ts = compute_step(init, ts, inter_axle)
+
+    # If next state is within epsilon of target, target is reached
+    if abs(init_ts[0]-xf) < e and abs(init_ts[1]-yf) < e:
+        print('target reached:', xf, yf)
+        keep_going = False
+        rebuild_solver = True
+    
+    ## Update plot data
     x_diff = [xf - x for x in state_opt[0]]
     y_diff = [yf - y for y in state_opt[1]]
 
@@ -132,33 +191,14 @@ def update(i):
     curve_pts.set_offsets(np.c_[xpts, ypts])
     curve_ln.set_data(xplt, yplt)
 
-    init = [state_opt[0][0], state_opt[1][0], state_opt[2][0], state_opt[3][0], state_opt[4][0], state_opt[5][0], u_opt[0][0], u_opt[1][0], u_opt[2][0]]
-
-    init_ts = compute_step(init, ts, inter_axle)
-
-    if abs(init_ts[0]-xf) < e and abs(init_ts[1]-yf) < e:
-        print('target reached:', xf, yf)
-        keep_going = False
-        rebuild_solver = True
-    
+    # Animation function stuff
     return [x_line, y_line, aux_line, alphaux_line, traj, curr_pt]
+
+### PLOTTING ###
 
 tgrid = [T/N*k for k in range(N+1)]
 
-w0 = init_ts + w0_suffix
-lbw = init_ts + lbw_suffix
-ubw = init_ts + ubw_suffix
-
-sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
-
-w_opt = sol['x'].full().flatten()
-state_opt, u_opt = trajectories(sol['x'])
-state_opt = state_opt.full() # to numpy array
-u_opt = u_opt.full() # to numpy array
-
-if cfg.log_path:
-    path_writer.writerow([state_opt[0][0], state_opt[1][0], u_opt[0][0], u_opt[1][0]])
-
+# Calculate the error
 x_diff = [xf - x for x in state_opt[0]]
 y_diff = [yf - y for y in state_opt[1]]
 
@@ -169,6 +209,7 @@ y_line, = ax1.plot(tgrid, y_diff, '-', color='black')
 aux_line, = ax1.step(tgrid, np.append(np.nan, u_opt[1]), '-.', color='green')
 alphaux_line, = ax1.step(tgrid, np.append(np.nan, u_opt[0]), '-.', color='blue')
 
+# Straight line bounds, should reference a constant by name
 amin, amax = -1, 1
 alphamin, alphamax = -np.pi, np.pi
 
@@ -182,7 +223,7 @@ ax1.plot(tgrid, amax_pts, '--', color='green', alpha=0.3)
 ax1.plot(tgrid, alphamin_pts, '--', color='blue', alpha=0.3)
 ax1.plot(tgrid, alphamax_pts, '--', color='blue', alpha=0.3)
 
-ax1.legend([r'$x_f - x$',r'$y_f - y$', r'$a$', r'$\alpha$'])
+ax1.legend([r'$x_f - x$',r'$y_f - y$', r'$a$ Acceleration', r'$\alpha$ Steering Wheel Vel'])
 ax1.set_xlabel('Time horizon')
 ax1.grid(True)
 
@@ -191,20 +232,21 @@ ax2.set_xlim([-6, 6])
 ax2.set_ylabel('y-axis')
 ax2.set_xlabel('x-axis')
 
-# plot curve
+# plot path polynomial
 curve_pts = ax2.scatter(xpts, ypts, color='grey', s=15)
 tplt = np.linspace(0, 1)
 xplt = xpoly(tplt)
 yplt = ypoly(tplt)
 curve_ln, = ax2.plot(xplt, yplt, '-.', color='grey')
 
+# plot solution path
 traj, = ax2.plot(state_opt[0], state_opt[1], '-', color='green', alpha=0.4)
 curr_pt, = ax2.plot([state_opt[0][0]], [state_opt[1][0]], marker='o', color='black')    
 target_pt, = ax2.plot([xf], [yf], marker='x', color='black')
 ax2.grid(True)
 
-writergif = animation.PillowWriter(fps=30)
 anim = animation.FuncAnimation(fig, update, interval=100, frames=gen, save_count=3000)
+# writergif = animation.PillowWriter(fps=30)
 # anim.save(cfg.anim_save_file, writer=writergif)
 plt.show()
 

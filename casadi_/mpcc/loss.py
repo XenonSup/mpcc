@@ -3,6 +3,8 @@ import casadi as cd
 def poly_deriv(coefs, order):
     """Returns vector of coefficients for the derivative of
         a given polynomial"""
+    # Highest power first
+    # TODO: Verify math
     coef_d = cd.SX.sym('c_deriv', order, 1)
     for i in range(coef_d.shape[0]):
         coef_d[i] = (order - i) * coefs[i]
@@ -19,6 +21,8 @@ def gen_cost_func(order):
     
     Output: Numeric cost
     """
+    # TODO: Verify correctness
+    # TODO: Vary coefficients and observe solution differences
     # variables
     a = cd.SX.sym('a')
     alpha = cd.SX.sym('alpha')
@@ -26,6 +30,7 @@ def gen_cost_func(order):
 
     npoly = order + 1
 
+    # Highest power first
     coefs_x = cd.SX.sym('cx', npoly, 1)
     coefs_y = cd.SX.sym('cy', npoly, 1)
     pos = cd.SX.sym('pos', 2, 1)

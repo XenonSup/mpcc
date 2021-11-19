@@ -14,7 +14,7 @@ x \\ y \\ \varphi \\ \delta \\ v_x \\ \theta
 ,
 \mathbf{u} =
 \begin{bmatrix}
-\alpha^u_x \\ a^u_x \\ \Delta t
+\alpha^u_x \\ a^u_x \\ d \theta
 \end{bmatrix}
 $$
 
@@ -31,7 +31,7 @@ v_x \cdot \sin{\varphi} \\
 \frac{v_x}{L} \cdot \tan{\delta} \\
 \alpha^u_x \\
 a^u_x \\
-v_x \cdot \Delta t
+v_x \cdot d \theta
 \end{bmatrix} 
 $$
 
@@ -41,7 +41,7 @@ $x,y$ : position coordinates
 
 $\varphi$: x-y orientation
 
-$\delta$ : Steering wheel velocity
+$\delta$ : Steering Wheel angle
 
 $v_x$ : longitudinal speed
 
@@ -49,11 +49,12 @@ $\theta$ : progress along a given curve
 
 And 
 
-$\alpha^u_x$ : Steering wheel acceleration (commanded)
+$\alpha^u_x$ : Steering wheel velocity (commanded)
 
 $a^u_x$ : Longitudinal acceleration (commanded)
 
-$\Delta t$ : progress rate (Computed or commanded?)
+$d \theta$ : progress rate (Computed or commanded?)
+"which is an approximation of the velocities projected onto the path"
  
 $L$ : inter-axle distance (fixed parameter)
 ## Discrete Model
@@ -69,7 +70,7 @@ x \\ y \\ \varphi \\ \delta \\ v_x \\ \theta
 ,
 \mathbf{u}_k =
 \begin{bmatrix}
-\alpha^u_x \\ a^u_x \\ \Delta t
+\alpha^u_x \\ a^u_x \\ d \theta
 \end{bmatrix}
 $$
 
@@ -85,7 +86,7 @@ v_x \cdot \sin{\varphi} \\
 \frac{v_x}{L} \cdot \tan{\delta} \\
 \alpha^u_x \\
 a^u_x \\
-v_x \cdot \Delta t
+v_x \cdot d \theta
 \end{bmatrix}
 ts
 $$
@@ -99,7 +100,7 @@ Where $ts$ is the timestep size
 $$
 \mathbf{w}_{init} =
 \begin{bmatrix}
-x \\ y \\ \varphi \\ \delta \\ v_x \\ \theta \\ \alpha^u_x \\ a^u_x \\ \Delta t
+x \\ y \\ \varphi \\ \delta \\ v_x \\ \theta \\ \alpha^u_x \\ a^u_x \\ d \theta
 \end{bmatrix}
 $$
 
@@ -168,3 +169,14 @@ Output `params` of `build_solver` $= \begin{bmatrix}
 w_{0,6:m}, w_{lb,6:m}, w_{ub,6:m}, g_{lb}, g_{ub} 
 \end{bmatrix}$
 where $w_\_ : (6+3)n \times 1 \,, g: 6n \times 1$
+
+---
+
+Is it possible to construct symbolic (SX) matrices for lbg,ubg, lbw, ubw, w0 ?
+YES
+
+Is it possible to pass them to `nlpsol` ?
+NO. (probably)
+
+Is it possible to parameterize the `order` and pass it?
+    - It's available as the size of the coefficient vector!

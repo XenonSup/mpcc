@@ -11,8 +11,8 @@ def get_timing(txt):
     return time
 
 def gen_t(pts1, pts2):
-    """ Generate a (normalized) piecewise linear distance vector
-        from start coordinates to each subsequent set of coordinates
+    """ Generate a (normalized) piecewise-linear distance vector
+        from start coordinates to each subsequent pair of coordinates
         For use as a progress-along-path variable
 
     Args:
@@ -20,7 +20,7 @@ def gen_t(pts1, pts2):
         pts2 (list): y-coordinates
 
     Returns:
-        list: normalized distances 
+        list: normalized distances from start
     """
     tpts = [0]
     for i, pt in enumerate(pts1):
@@ -47,7 +47,9 @@ def get_curve(curve, prev=None):
             Defaults to None.
 
     Returns:
-        [list]: xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order
+        [list]: x_start, y_start, x_final, y_final,
+            initial_conditions, xpts, ypts, tpts,
+            xpoly, ypoly, x_poly_coef, y_poly_coef, order
     """
     xpts, ypts = curve['xpts'], curve['ypts']
     order = curve['order']
@@ -68,11 +70,12 @@ def get_curve(curve, prev=None):
 
     poly_version = 0
     if poly_version == 0:
-
-        cx = list(xpoly)[::-1]
+        # Highest power first
+        cx = list(xpoly)[::-1] 
         cy = list(ypoly)[::-1]
     else:
         # The "correct" coefficients result in worse solutions
+        # Highest power first
         cx = xpoly.convert().coef[::-1]
         cy = ypoly.convert().coef[::-1]
         xpoly = xpoly.convert()
@@ -93,6 +96,7 @@ def compute_step(init, ts, D): # init = [x, y, phi, delta, vx, theta, alphaux, a
     """
     ## How is dt different from ts?
     ## Is dt computed and ts simulated/expected?
+    ## TODO: Add noise to account for model uncertainty
     
     x, y, phi, delta, v, theta, alpha, a, dt = init
     
