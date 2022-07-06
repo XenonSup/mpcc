@@ -1,4 +1,5 @@
 import casadi as cd
+import numpy as np
 import os
 
 ### OPTIONS
@@ -6,13 +7,43 @@ mpc_type     = 'mpcc'
 ipopt_solver = 'mumps'  # mumps OR ma57
 solve_method = 'rk4'    # rk4 OR colloc 
 
+# Probem Parameters
+
+T = 5 # Time horizon
+N = 20  # number of control intervals
+inter_axle = 0.5   # inter-axle distance
+
+ts = .08 # time-step
+e = 0.2 # epsilon (value for when solving stops)
+
+steer_vel_max = 2*np.pi
+steer_vel_min = -2*np.pi
+acc_max = 1
+acc_min = -1
+dtheta_min = 0
+dtheta_max = 1
+
+orient_max = np.inf # why not 2pi?
+orient_min = -np.inf
+steer_max = np.pi/4
+steer_min = -np.pi/4
+vel_max = 2
+vel_min = 0
+
+
+### Compilation Options
 gen_compiled = False
 use_compiled = False
+opt_lvl = 2
+opt_flag= "-O" + str(opt_lvl)
 
 if gen_compiled or use_compiled:
     # Store path to compiled binary
-    comp_bin_name = '_'.join([ipopt_solver, solve_method, mpc_type])
-    comp_dir      = os.path.join('compiled_casadi', mpc_type, comp_bin_name, 'nlp.so')
+    comp_bin_name = '_'.join([ipopt_solver, solve_method, mpc_type]) # "mumps_rk4_mpcc"
+    comp_dir      = os.path.join('compiled_casadi', mpc_type, comp_bin_name, 'nlp.so') # "compiled_casadi/mpcc/<cbn>/nlp.so"
+
+    comp_bin_name = '_'.join(['T' + str(int(T)), 'N' + str(int(N)), 'O' + str(int(opt_lvl)), "nlp.c"])
+    comp_dir      = os.path.join('compiled',comp_bin_name)
     comp_bin_path = os.path.abspath(comp_dir)
     # comp_bin_path = os.path.abspath('./nlp.so')
     print( "Compiled Binary Path: "+ comp_bin_path)
@@ -55,14 +86,6 @@ true_csv = os.path.join(out_path, 'true.csv')
 plot_sparsity = False
 ##### END ACCESSORY #####
 
-# Probem Parameters
-
-T = 10. # Time horizon
-N = 60  # number of control intervals
-inter_axle = 0.5   # inter-axle distance
-
-ts = .08 # time-step
-e = 0.1 # epsilon (value for when solving stops)
 
 ### Routes
 

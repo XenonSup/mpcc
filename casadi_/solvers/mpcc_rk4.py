@@ -90,13 +90,8 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
 
     # Start with an empty NLP
     w=[]
-    lbw = []
-    ubw = []
-    w0 = []
 
     g=[]
-    lbg = []
-    ubg = []
 
     J = 0
 
@@ -108,9 +103,6 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     Xk = cd.SX.sym('X0', 6)
 
     w += [Xk]
-    lbw += init_ts
-    ubw += init_ts
-    w0  += init_ts
     coord_plot += [Xk]
 
     # Formulate the NLP
@@ -119,9 +111,6 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         Uk = cd.SX.sym('U_' + str(k), 3)
         w   += [Uk]
         #       alphaux  aux  dt
-        lbw += [-2*cd.pi, -1, 0]
-        ubw += [ 2*cd.pi,  1, 1]
-        w0  += [rd.randint(-628, 628)/1000., rd.randint(-100, 100)/1000., rd.randint(0, 100)/1000.]
         u_plot += [Uk]
 
         # Integrate till the end of the interval
@@ -132,43 +121,11 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         # New NLP variable for state at end of interval
         Xk = cd.SX.sym('X_' + str(k+1), 6)
         w   += [Xk]
-        # vx, delta lb & ub = MAGIC NUMBERS!
-        #          x         y       phi     delta   vx theta
-        lbw += [-cd.inf, -cd.inf, -cd.inf, -cd.pi/4,  0, 0] 
-        ubw += [ cd.inf,  cd.inf,  cd.inf,  cd.pi/4,  2, 1]
-        
-        # Initial guess for x-y position and orientation
-        # Assumes progress along control intervals
-        # maps linearly to progress along curve
-        ## This is the only place xpoly & ypoly are used
-        ## 1. Can they be safely removed and replaced with a random guess?
-        ## 2. xc & yc are input parameters already. Can I use polyval with them
-        ## instead ?
-        ## 3. Supply 0's instead?
-        ## 4. Supply x0 as guesses -> Can't be very var
-        ## 5. interpolate linear line between x0 and xf
-        ## 6. Construct a Casadi function to get 
 
-        # kf = float(k)
-        theta_tmp = float(k)/(N-1)  # Percentage progress along horizon
-        dtheta = 0.2          # steering lookahead, MAGIC NUMBER
-        theta_step = theta_tmp + dtheta
-
-        # xc, yc : Highest power first coefficient array
-        # Original was arctan
-        x_tmp, y_tmp = xpoly(theta_tmp), ypoly(theta_tmp)
-        phi_tmp = cd.arctan2((ypoly(theta_step) - y_tmp),(xpoly(theta_step) - x_tmp)) 
-
-        w0 += [x_tmp, y_tmp, phi_tmp, 0, rd.randint(0,200)/1000., theta_tmp]
-
-        # w0 += [0, 0, 0, 0, 0, theta_tmp]
-        # w0 += [0, 0, 0, 0, 0, 0]
         coord_plot += [Xk]
 
         # Add equality constraint
         g   += [Xk_end-Xk]
-        lbg += [0, 0, 0, 0, 0, 0]
-        ubg += [0, 0, 0, 0, 0, 0]
     
     # Concatenate vectors
     w = cd.vertcat(*w)  # ((6+3)*N + 6) x 1 column vector
@@ -212,7 +169,7 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
         if cfg.gen_compiled:  
             # Push the nlp formulation to C & compile a binary
             solver.generate_dependencies('nlp.c')                                        
-            system('gcc -fPIC -shared -O0 nlp.c -o nlp.so')
+            system('gcc -fPIC -shared -O2 nlp.c -o nlp.so')
 
     if cfg.use_compiled:  # Create binary solver
         nlp_solver_file = cfg.comp_bin_path
@@ -221,4 +178,4 @@ def build_solver(init_ts, T, N, D, order, xpoly, ypoly):
     # Function to get x and u trajectories from w
     trajectories = cd.Function('trajectories', [w], [coord_plot, u_plot], ['w'], ['x', 'u'])
 
-    return solver, [w0[6:], lbw[6:], ubw[6:], lbg, ubg], trajectories
+    return solver, trajectories

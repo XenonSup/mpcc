@@ -49,21 +49,17 @@ xs, ys, xf, yf, init_ts, xpts, ypts, tpts, xpoly, ypoly, cx, cy, order = get_cur
 
 print(cx, cy)
 
-# Generate cost function for given order
+# Generate cost function for given order. Not being used
 # Can supply any curve and any state otherwise
-cost_func = gen_cost_func(order)
+# cost_func = gen_cost_func(order)
 
 # solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
 # w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = params
-solver, _, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
+solver, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
 
 bounds = BoundAndGuess(init_ts, N, xpoly, ypoly)
-w0_suffix, lbw_suffix, ubw_suffix, lbg, ubg = bounds.get_bounds_suffix()
 
-# Append the initial state
-w0 = init_ts + w0_suffix
-lbw = init_ts + lbw_suffix
-ubw = init_ts + ubw_suffix
+w0, lbw, ubw, lbg, ubg = bounds.get_all_bounds()
 
 # Run first instance of solver, get solutions
 sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
@@ -76,30 +72,25 @@ u_opt = u_opt.full() # to numpy array
 if cfg.log_path:
     path_writer.writerow([state_opt[0][0], state_opt[1][0], u_opt[0][0], u_opt[1][0]])
 def solve_mpcc():
-    global sol, rebuild_solver
+    global sol, rebuild_solver, bounds
 
     if rebuild_solver:
-        global solver, params, trajectories, w0_suffix, lbw_suffix, ubw_suffix
-        # solver, params, trajectories = build_solver(init_ts, T, N, inter_axle, order, xpoly, ypoly)
+        global solver
+        
+        # global update? local variables?
+        # lbw[:6] = init_ts -> UnboundLocalError: local variable 'lbw' referenced before assignment
+        # lbg[:6] = init_ts -> No error?!
 
-        # w0_suffix, lbw_suffix, ubw_suffix, _, _ = params
-
-        w0_suffix, lbw_suffix, ubw_suffix, _, _ = bounds.update(init_ts, xpoly, ypoly, suffix=True)
-
-        w0 = init_ts + w0_suffix
-        lbw = init_ts + lbw_suffix
-        ubw = init_ts + ubw_suffix
-
-        # w0, lbw, ubw, _, _ = bounds.update(init_ts, xpoly, ypoly, suffix=False)
+        # local variables
+        w0, lbw, ubw = bounds.update(init_ts, xpoly, ypoly)
 
         sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
 
         print('Rebuilt solver')
         rebuild_solver = False
+
     else:
-        lbw = init_ts + lbw_suffix
-        ubw = init_ts + ubw_suffix
-        
+        lbw, ubw = bounds.update_wbounds(init_ts)
         t0 = time.time()
         sol = solver(x0=sol['x'], lam_x0=sol['lam_x'], lam_g0=sol['lam_g'], lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg, p=cd.vertcat(cx, cy))
         t1 = time.time()
@@ -119,6 +110,7 @@ def solve_mpcc():
 
 def gen():
     # Yields a dummy frame number to keep solver animation going
+    # and updates curve when completed
     global keep_going, num_targets
     i = 0
     # Keeps yielding as long as there are still targets

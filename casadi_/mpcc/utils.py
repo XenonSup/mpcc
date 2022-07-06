@@ -56,6 +56,9 @@ def get_curve(curve, prev=None):
 
     if prev is not None:
         init_ts = prev
+        xpts.insert(0,init_ts[0])
+        ypts.insert(0,init_ts[1])
+        
     else:
         init_ts = curve['init_ts']
     

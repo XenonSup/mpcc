@@ -1,32 +1,46 @@
 import random as rd
 import numpy as np
+import casadi_.mpcc.config as cfg
 
 class BoundAndGuess:
 
+    coef_list = False
     def __init__(self, init_ts,N, xc, yc):
-        self.coeff = False
         self.N = N
 
-        self.regen_bounds(init_ts, xc, yc)
         self.lbg, self.ubg = self.gen_gbounds(self.N)
-
-    def regen_bounds(self, init_ts, xc, yc):
-        self.w0 = self.gen_w0(init_ts, self.N, xc, yc)
         self.lbw, self.ubw = self.gen_wbounds(init_ts, self.N)
-        
-    def get_bounds(self):
+        self.w0 = self.gen_w0(init_ts, self.N, xc, yc)
+
+    def get_all_bounds(self):
         return self.w0, self.lbw, self.ubw, self.lbg, self.ubg
 
-    def get_bounds_suffix(self):
-        return self.w0[6:], self.lbw[6:].tolist(), self.ubw[6:].tolist(), self.lbg, self.ubg
+    def get_bounds(self):
+        return self.w0, self.lbw, self.ubw
 
-    def update(self, init_ts, xc, yc, suffix=False):
-        self.regen_bounds(init_ts, xc, yc)
+    # def get_all_bounds_suffix(self):
+    #     return self.w0[6:], self.lbw[6:].tolist(), self.ubw[6:].tolist(), self.lbg, self.ubg
+
+    # def get_bounds_suffix(self):
+    #     return self.w0[6:], self.lbw[6:].tolist(), self.ubw[6:].tolist()#, self.lbg, self.ubg
+
+    def update(self, init_ts, xc, yc):
+
+        # update w0 completely
+        self.w0 = self.gen_w0(init_ts, self.N, xc, yc)
+        # update wbounds 0:6
+        self.update_wbounds(init_ts)
+        # return gbounds
         
         if suffix:
             return self.get_bounds_suffix()
         else:
             return self.get_bounds()
+
+    def update_wbounds(self, init_ts):
+        self.lbw[0:6] = init_ts
+        self.ubw[0:6] = init_ts
+        return self.lbw, self.ubw
 
     def gen_w0(self, init_ts,N,xc,yc):
         """regenerate the initial guess vector
@@ -58,7 +72,7 @@ class BoundAndGuess:
             
             # xpoly = np.polynomial.polynomial.Polynomial(xc[::-1])
             # ypoly = np.polynomial.polynomial.Polynomial(yc[::-1])
-            if self.coeff:
+            if self.coef_list:
                 x_tmp = np.polyval(xc, theta_tmp)
                 y_tmp = np.polyval(yc, theta_tmp)
                 x_step = np.polyval(xc, theta_step)
@@ -75,8 +89,12 @@ class BoundAndGuess:
         return w0
     def gen_wbounds(self, init_ts, N):
         
-        lbw_temp_u = [-2*np.pi, -1, 0]
-        ubw_temp_u = [ 2*np.pi,  1, 1]
+        # lbw_temp_u = [-2*np.pi, -1, 0]
+        # ubw_temp_u = [ 2*np.pi,  1, 1]
+
+        lbw_temp_u = [cfg.steer_vel_min, cfg.acc_min, cfg.dtheta_min]
+        ubw_temp_u = [cfg.steer_vel_max, cfg.acc_max, cfg.dtheta_max]
+        
 
         lbw_temp_z = [-np.inf, -np.inf, -np.inf, -np.pi/4,  0, 0] 
         ubw_temp_z = [ np.inf,  np.inf,  np.inf,  np.pi/4,  2, 1]
